@@ -25,5 +25,8 @@
   },
   "overrides": {
     "brace-expansion": "2.0.1"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
