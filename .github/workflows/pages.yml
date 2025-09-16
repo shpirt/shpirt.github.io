@@ -2,33 +2,36 @@ name: Pages
 
 on:
   push:
-    branches:
-      - main  # default branch
+    branches: [ main ]
 
 jobs:
   pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v3
+      # Node 22（或用 '20.19.0' 及以上）
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '22'
+          cache: 'npm'              # 用 npm 缓存，替代手动缓存 node_modules
 
-      - name: Cache NPM dependencies
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-cache-
+      - name: Use official npm registry
+        run: npm config set registry https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm install
+      - name: Print versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Clean & install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm ci || npm i
 
       - name: Build
-        run: npm run build
+        run: npm run build          # 通常等价于 hexo generate
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
