@@ -10,28 +10,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Node 22（或用 '20.19.0' 及以上）
+      # Node >= 20.19（建议 22）
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'              # 用 npm 缓存，替代手动缓存 node_modules
+          cache: 'npm'   # 用 npm 缓存
 
       - name: Use official npm registry
         run: npm config set registry https://registry.npmjs.org
 
-      - name: Print versions
+      - name: Show versions
         run: |
           node -v
           npm -v
 
-      - name: Clean & install
+      # 有 lockfile 用 npm ci；否则用 npm install
+      - name: Install dependencies
         run: |
-          rm -rf node_modules package-lock.json
-          npm ci || npm i
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build
-        run: npm run build          # 通常等价于 hexo generate
+        run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
